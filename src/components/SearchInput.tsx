@@ -13,6 +13,7 @@ interface Props {
   onChangeSearchMode: (m: 'hybrid' | 'lexical' | 'semantic') => void;
   classification: ModalityClassification | null;
   isInterventions: boolean;
+  totalInterventionsCount: number;
 }
 
 export const SearchInput: React.FC<Props> = ({
@@ -25,7 +26,8 @@ export const SearchInput: React.FC<Props> = ({
   searchMode,
   onChangeSearchMode,
   classification,
-  isInterventions
+  isInterventions,
+  totalInterventionsCount
 }) => {
   return (
     <div className="space-y-3">
@@ -34,19 +36,19 @@ export const SearchInput: React.FC<Props> = ({
         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#7D8882]">
           <Search className="w-4 h-4 text-[#4A6B5D]" />
         </div>
-        
+
         <input
           type="text"
           value={query}
           onChange={(e) => onChangeQuery(e.target.value)}
           placeholder={placeholder}
-          autoFocus
-          className="w-full bg-white border border-[#DDD9D0] rounded-xl pl-10 pr-28 py-3 text-sm text-[#242927] placeholder-[#8F9893] focus:outline-none focus:border-[#4A6B5D] focus:ring-2 focus:ring-[#4A6B5D]/15 transition-all shadow-xs"
+          className="w-full bg-white border border-[#DDD9D0] rounded-xl pl-10 pr-40 py-3 text-sm text-[#242927] placeholder-[#8F9893] outline-none transition-all shadow-xs"
         />
 
         <div className="absolute inset-y-0 right-0 pr-2 flex items-center gap-1.5">
           {query && (
             <button
+              type="button"
               onClick={() => onChangeQuery('')}
               className="p-1 rounded-lg hover:bg-[#F0EEE9] text-[#7B8580] hover:text-[#242927] transition-colors cursor-pointer"
               title="Clear search"
@@ -60,7 +62,7 @@ export const SearchInput: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => onChangeSearchMode('hybrid')}
-              className={`px-2 py-0.5 rounded-md font-medium transition-all ${
+              className={`px-2 py-0.5 rounded-md font-medium transition-all cursor-pointer ${
                 searchMode === 'hybrid'
                   ? 'bg-[#4A6B5D] text-white shadow-xs'
                   : 'text-[#616B66] hover:text-[#242927]'
@@ -72,19 +74,19 @@ export const SearchInput: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => onChangeSearchMode('lexical')}
-              className={`px-2 py-0.5 rounded-md font-medium transition-all ${
+              className={`px-2 py-0.5 rounded-md font-medium transition-all cursor-pointer ${
                 searchMode === 'lexical'
                   ? 'bg-[#4A6B5D] text-white shadow-xs'
                   : 'text-[#616B66] hover:text-[#242927]'
               }`}
-              title="Lexical: Fast Exact & Fuzzy BM25 Inverted Index"
+              title="Lexical: Fast Exact & Prefix BM25 Inverted Index"
             >
               BM25
             </button>
             <button
               type="button"
               onClick={() => onChangeSearchMode('semantic')}
-              className={`px-2 py-0.5 rounded-md font-medium transition-all ${
+              className={`px-2 py-0.5 rounded-md font-medium transition-all cursor-pointer ${
                 searchMode === 'semantic'
                   ? 'bg-[#4A6B5D] text-white shadow-xs'
                   : 'text-[#616B66] hover:text-[#242927]'
@@ -99,7 +101,7 @@ export const SearchInput: React.FC<Props> = ({
 
       {/* Auto-detected Modality Cue Banner */}
       {classification && classification.confidence >= 0.5 && (
-        <div className="flex items-center justify-between bg-[#EDF4F0] border border-[#D0E2D8] rounded-xl px-3.5 py-2 text-xs text-[#305244] animate-fadeIn">
+        <div className="flex items-center justify-between bg-[#EDF4F0] border border-[#D0E2D8] rounded-xl px-3.5 py-2 text-xs text-[#305244]">
           <div className="flex items-center gap-2">
             <BrainCircuit className="w-4 h-4 text-[#4A6B5D] shrink-0" />
             <span>
@@ -111,10 +113,11 @@ export const SearchInput: React.FC<Props> = ({
           </div>
           {selectedModality !== classification.topModality && (
             <button
+              type="button"
               onClick={() => onSelectModality(classification.topModality)}
               className="text-[11px] font-semibold text-[#2C4A3D] hover:text-white bg-[#D6E6DE] hover:bg-[#4A6B5D] px-2.5 py-0.5 rounded-md transition-colors cursor-pointer"
             >
-              Filter to this modality
+              Filter to modality
             </button>
           )}
         </div>
@@ -128,6 +131,7 @@ export const SearchInput: React.FC<Props> = ({
           </span>
 
           <button
+            type="button"
             onClick={() => onSelectModality('all')}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer shrink-0 ${
               selectedModality === 'all'
@@ -135,7 +139,7 @@ export const SearchInput: React.FC<Props> = ({
                 : 'bg-[#F2F0EB] text-[#555E59] hover:bg-[#E7E4DC] hover:text-[#242927]'
             }`}
           >
-            All Modalities (615)
+            All Modalities ({totalInterventionsCount})
           </button>
 
           {availableModalities.map((mod) => {
@@ -143,6 +147,7 @@ export const SearchInput: React.FC<Props> = ({
             return (
               <button
                 key={mod}
+                type="button"
                 onClick={() => onSelectModality(mod)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer shrink-0 ${
                   isSelected

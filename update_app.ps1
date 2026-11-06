@@ -67,3 +67,4 @@ try {
 
 Write-Host ""
 Write-Host "Update completed! You can now launch Therapist-Documentation-Tool.html." -ForegroundColor Green
+

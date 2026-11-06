@@ -1,60 +1,23 @@
 import React from 'react';
-import type { QuestionType, QuestionConfig } from '../types/documentation';
-import { Target, Activity, ShieldAlert, FileText, CheckCircle2 } from 'lucide-react';
+import { QUESTION_CONFIGS, type QuestionType } from '../types/documentation';
+import { Target, Activity, ShieldAlert, FileText, CheckCircle2, Sparkles } from 'lucide-react';
 
 interface Props {
   currentQuestion: QuestionType;
   onSelectQuestion: (q: QuestionType) => void;
   selectionCounts: Record<QuestionType, number>;
+  recommendedNext: QuestionType | null;
+  peripheralPulseActive: boolean;
+  onQuickCompleteRoutine: (q: QuestionType) => void;
 }
-
-export const QUESTION_CONFIGS: QuestionConfig[] = [
-  {
-    id: 'session_focus',
-    label: 'Session Focus',
-    badge: '1-3 Topics',
-    prompt: 'List the 1-3 main topics focused on during the session.',
-    subPrompt: 'Identify primary clinical presentations, distressing themes, or presenting symptoms.',
-    placeholder: 'Search session topics (e.g., anxiety, communication, grief, trauma)...',
-    recommendedMin: 1,
-    recommendedMax: 3
-  },
-  {
-    id: 'interventions',
-    label: 'Interventions',
-    badge: '3-5 Interventions',
-    prompt: 'What 3-5 interventions were used to address the client\'s presenting problems and goals?',
-    subPrompt: 'Search across 615+ clinical interventions across 12 evidence-based modalities.',
-    placeholder: 'Type symptom or intervention (e.g., cognitive restructuring, radical acceptance, gottman)...',
-    recommendedMin: 3,
-    recommendedMax: 5
-  },
-  {
-    id: 'risk_factors',
-    label: 'Risk Factors',
-    badge: 'Risk & Safety',
-    prompt: 'Additional Risk Factors (e.g., substance abuse, NSSI, intimate partner violence, etc.)',
-    subPrompt: 'Document acute or monitored clinical risk indicators and safety screening.',
-    placeholder: 'Search risk factors (e.g., NSSI, passive ideation, substance, safety plan)...',
-    recommendedMin: 0,
-    recommendedMax: 3
-  },
-  {
-    id: 'additional_info',
-    label: 'Additional Info',
-    badge: 'Plan & Goals',
-    prompt: 'Additional Information (e.g., homework, goals for next session, referral provided, etc.)',
-    subPrompt: 'Record between-session homework assignments, follow-up scheduling, and care coordination.',
-    placeholder: 'Search additional items (e.g., thought record, psychiatrist referral, exposure goal)...',
-    recommendedMin: 0,
-    recommendedMax: 3
-  }
-];
 
 export const QuestionSelector: React.FC<Props> = ({
   currentQuestion,
   onSelectQuestion,
-  selectionCounts
+  selectionCounts,
+  recommendedNext,
+  peripheralPulseActive,
+  onQuickCompleteRoutine
 }) => {
   const activeConfig = QUESTION_CONFIGS.find(q => q.id === currentQuestion)!;
 
@@ -68,47 +31,94 @@ export const QuestionSelector: React.FC<Props> = ({
   };
 
   return (
-    <div className="bg-white border border-[#E6E3DC] rounded-2xl p-4 shadow-xs">
-      {/* Top Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-[#EFECE6] pb-3">
-        {QUESTION_CONFIGS.map((q) => {
-          const isActive = q.id === currentQuestion;
-          const count = selectionCounts[q.id] || 0;
-          const isComplete = q.recommendedMin ? count >= q.recommendedMin : count > 0;
+    <div
+      style={{
+        backgroundImage: 'linear-gradient(225deg, rgba(255,255,255,0.98) 0%, rgba(251,250,247,0.95) 45%, rgba(244,242,236,0.96) 100%)',
+        boxShadow: '-5px 6px 14px -3px rgba(24, 34, 29, 0.10), -2px 2px 5px -1px rgba(24, 34, 29, 0.06), inset -1px 1px 0px rgba(255, 255, 255, 0.95)'
+      }}
+      className="backdrop-blur-xs border border-t-[#F8F6F2] border-r-[#F8F6F2] border-b-[#D4CFC5] border-l-[#D4CFC5] rounded-2xl p-4 transition-colors duration-500"
+    >
+      {/* Top 4-Chapter Navigation Rail (Cowan 4-Chunk Bound) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#EFECE6] pb-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {QUESTION_CONFIGS.map((q, idx) => {
+            const isActive = q.id === currentQuestion;
+            const count = selectionCounts[q.id] || 0;
+            const isComplete = q.recommendedMin ? count >= q.recommendedMin : count > 0;
+            const isRecommendedNext = recommendedNext === q.id;
 
-          return (
-            <button
-              key={q.id}
-              onClick={() => onSelectQuestion(q.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer ${
-                isActive
-                  ? 'bg-[#4A6B5D] text-white shadow-xs'
-                  : 'bg-[#F2F0EB] text-[#555C58] hover:bg-[#EAE7E0] hover:text-[#242927]'
-              }`}
-            >
-              {getIcon(q.id)}
-              <span>{q.label}</span>
-              {count > 0 && (
-                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                  isActive ? 'bg-white/20 text-white' : 'bg-[#4A6B5D]/15 text-[#3D5B4F]'
+            return (
+              <button
+                key={q.id}
+                type="button"
+                onClick={() => onSelectQuestion(q.id)}
+                style={{
+                  transform: isRecommendedNext && peripheralPulseActive ? 'translateY(-2px)' : 'translateY(0px)',
+                  transition: 'transform 600ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, opacity 250ms ease'
+                }}
+                className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold cursor-pointer ${
+                  isActive
+                    ? 'bg-[#3D5B4F] text-white shadow-xs ring-2 ring-[#3D5B4F]/20'
+                    : isRecommendedNext && peripheralPulseActive
+                    ? 'bg-[#FBF7EE] text-[#242927] border border-[#E6C875] shadow-xs'
+                    : 'bg-[#F2F0EB] text-[#555C58] opacity-85 hover:opacity-100 hover:bg-[#EAE7E0] hover:text-[#242927]'
+                }`}
+              >
+                <span className={`w-4 h-4 rounded-full text-[10px] flex items-center justify-center font-bold ${
+                  isComplete
+                    ? (isActive ? 'bg-emerald-300 text-[#183328]' : 'bg-[#3D5B4F] text-white')
+                    : (isActive ? 'bg-white/20 text-white' : 'bg-[#E2DFD7] text-[#555C58]')
                 }`}>
-                  {count}
+                  {isComplete ? '✓' : idx + 1}
                 </span>
-              )}
-              {isComplete && (
-                <CheckCircle2 className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-200' : 'text-[#4A6B5D]'}`} />
-              )}
+                {getIcon(q.id)}
+                <span>{q.label}</span>
+                {count > 0 && (
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-[#4A6B5D]/15 text-[#3D5B4F]'
+                  }`}>
+                    {count}
+                  </span>
+                )}
+                {isComplete && (
+                  <CheckCircle2 className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-200' : 'text-[#4A6B5D]'}`} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* One-Tap Quick Routine Completion for Safety or Plan */}
+        <div className="flex items-center gap-2">
+          {selectionCounts.risk_factors === 0 && (
+            <button
+              type="button"
+              onClick={() => onQuickCompleteRoutine('risk_factors')}
+              className="text-[11px] font-semibold bg-[#EFF6F1] hover:bg-[#E0EFE5] text-[#2F6144] border border-[#CDE4D5] px-2.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1"
+            >
+              <Sparkles className="w-3 h-3" />
+              <span>+ No Acute Risk</span>
             </button>
-          );
-        })}
+          )}
+          {selectionCounts.additional_info === 0 && (
+            <button
+              type="button"
+              onClick={() => onQuickCompleteRoutine('additional_info')}
+              className="text-[11px] font-semibold bg-[#F0F5F9] hover:bg-[#E2ECF4] text-[#2E5568] border border-[#CFE0EC] px-2.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1"
+            >
+              <Sparkles className="w-3 h-3" />
+              <span>+ Weekly Schedule</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Active Question Banner & Clinical Guidance */}
+      {/* Active Chapter Banner & Clinical Guidance */}
       <div className="mt-3.5 flex flex-col md:flex-row md:items-center justify-between gap-2">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold tracking-wider uppercase text-[#4A6B5D] bg-[#EDF3F0] px-2 py-0.5 rounded border border-[#D5E3DC]">
-              Active Field: {activeConfig.label}
+              Active Section: {activeConfig.label}
             </span>
             <span className="text-xs text-[#717A75]">
               Recommended: {activeConfig.badge}

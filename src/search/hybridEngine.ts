@@ -51,10 +51,6 @@ export class HybridSearchEngine {
       'discernment', 'mixed agenda', 'leaning in', 'leaning out', 'divorce', 'separation',
       'decision to stay or leave', 'relationship commitment'
     ],
-    'Trauma-Focused Therapy': [
-      'ptsd', 'hyperarousal', 'flashback', 'grounding', 'nightmare', 'somatic', 'containment',
-      'safety stabilization', 'intrusive'
-    ],
     'Person-Centered Therapy': [
       'unconditional positive regard', 'empathy', 'congruence', 'active listening',
       'client-centered', 'validation', 'authenticity', 'self-actualization'
@@ -62,6 +58,21 @@ export class HybridSearchEngine {
     'CBT for Couples': [
       'couples cbt', 'partner thoughts', 'communication patterns', 'mutual reframing',
       'relationship cognitive distortion', 'shared problem solving'
+    ],
+    'Exposure and Response Prevention (ERP)': [
+      'erp', 'ritual', 'compulsion', 'obsession', 'habituation', 'inhibitory learning',
+      'response prevention', 'exposure hierarchy'
+    ],
+    'Attachment-Based Therapy': [
+      'attachment', 'caregiver', 'abandonment', 'anxious-avoidant', 'pursue-withdraw',
+      'internal working model', 'secure base'
+    ],
+    'Somatic Therapy': [
+      'somatic', 'interocept', 'body scan', 'autonomic', 'nervous system', 'grounding',
+      'muscular tension', 'pendulation', 'titration'
+    ],
+    'Existential Therapy': [
+      'existential', 'meaning', 'purpose', 'mortality', 'freedom', 'isolation', 'authenticity'
     ]
   };
 

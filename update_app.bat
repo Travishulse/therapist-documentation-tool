@@ -10,3 +10,4 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0update_app.ps1"
 
 echo.
 pause
+

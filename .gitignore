@@ -14,11 +14,19 @@ dist-ssr
 *.bak
 
 # Local correspondence and operator scripts
-email_*.md
+email_*
 scripts/send_liz_email.py
 scripts/check_liz_reply.py
+scripts/check_emails.py
+scripts/fetch_email_269.py
+scripts/find_all_recent.py
+scripts/save_email_parts.py
+scripts/search_all_folders.py
 decisions.tsv
 TherapistDocumentationTool.zip
+
+# Production build artifacts
+production/build/
 
 # Editor directories and files
 .vscode/*

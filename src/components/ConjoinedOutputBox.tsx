@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import type { ClinicalItem, DocumentationNote } from '../types/documentation';
-import { QUESTION_CONFIGS } from './QuestionSelector';
-import { Check, X, RotateCcw, Sparkles } from 'lucide-react';
+import { QUESTION_CONFIGS, type ClinicalItem, type DocumentationNote } from '../types/documentation';
+import { Check, X, RotateCcw, Sparkles, Download } from 'lucide-react';
 
 interface Props {
   note: DocumentationNote;
@@ -10,6 +9,7 @@ interface Props {
   rawText: string;
   onChangeRawText: (text: string) => void;
   onRegenerateText: () => void;
+  reEntryPulseActive: boolean;
 }
 
 export const ConjoinedOutputBox: React.FC<Props> = ({
@@ -18,9 +18,11 @@ export const ConjoinedOutputBox: React.FC<Props> = ({
   onClearAll,
   rawText,
   onChangeRawText,
-  onRegenerateText
+  onRegenerateText,
+  reEntryPulseActive
 }) => {
   const [copied, setCopied] = useState(false);
+  const [savedTxt, setSavedTxt] = useState(false);
 
   const totalItemsCount =
     note.session_focus.length +
@@ -46,7 +48,6 @@ export const ConjoinedOutputBox: React.FC<Props> = ({
         textarea.style.position = 'fixed';
         textarea.style.opacity = '0';
         document.body.appendChild(textarea);
-        textarea.focus();
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
@@ -62,47 +63,101 @@ export const ConjoinedOutputBox: React.FC<Props> = ({
     }
   };
 
+  const handleSaveTxt = () => {
+    try {
+      const blob = new Blob([rawText || ''], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Clinical-Progress-Note.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setSavedTxt(true);
+      setTimeout(() => setSavedTxt(false), 2000);
+    } catch (e) {
+      console.error('Save .txt failed:', e);
+    }
+  };
+
   const wordCount = rawText.trim() ? rawText.trim().split(/\s+/).length : 0;
   const charCount = rawText.length;
 
   return (
-    <div className="bg-white border border-[#E6E3DC] rounded-2xl p-5 flex flex-col h-full shadow-xs relative">
-      {/* Header with Title and Copy to Clipboard Emoji Button */}
-      <div className="flex items-center justify-between pb-4 border-b border-[#EFECE6]">
-        <div>
-          <h3 className="text-base font-bold text-[#242927] flex items-center gap-2">
-            Clinical Documentation Note
-            <span className="text-xs font-normal text-[#6F7773]">
+    <div
+      style={{
+        transition: 'box-shadow 550ms cubic-bezier(0.22, 1, 0.36, 1), border-color 450ms ease',
+        backgroundImage: 'linear-gradient(225deg, rgba(255,255,255,0.99) 0%, rgba(252,251,248,0.96) 42%, rgba(245,243,237,0.98) 100%)',
+        boxShadow: reEntryPulseActive
+          ? '-7px 8px 20px -3px rgba(61, 91, 79, 0.24), -2px 3px 6px -1px rgba(61, 91, 79, 0.14), inset -1px 1px 0px rgba(255, 255, 255, 0.95)'
+          : '-6px 7px 16px -3px rgba(24, 34, 29, 0.12), -2px 3px 6px -1px rgba(24, 34, 29, 0.07), inset -1px 1px 0px rgba(255, 255, 255, 0.95)'
+      }}
+      className={`bg-white rounded-2xl p-5 flex flex-col h-full relative border-2 ${
+        reEntryPulseActive
+          ? 'border-[#529478] ring-4 ring-[#529478]/15'
+          : 'border-t-[#F8F6F2] border-r-[#F8F6F2] border-b-[#D4CFC5] border-l-[#D4CFC5]'
+      }`}
+    >
+      {/* Header with Title, Save .txt, Copy to Clipboard, and Draggable Note Handle */}
+      <div className="flex flex-wrap items-center justify-between pb-4 border-b border-[#EFECE6] gap-2 min-w-0">
+        <div className="min-w-0">
+          <h3 className="text-base font-bold text-[#242927] flex items-center gap-2 truncate">
+            <span className="truncate">Clinical Documentation Note</span>
+            <span className="text-xs font-normal text-[#6F7773] shrink-0">
               ({totalItemsCount} items conjoined)
             </span>
           </h3>
-          <p className="text-xs text-[#6F7773] mt-0.5">
+          <p className="text-xs text-[#6F7773] mt-0.5 truncate">
             Auto-conjoined responses formatted for your clinical record.
           </p>
         </div>
 
-        {/* Standard Clipboard Emoji Button on top right corner */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {/* Save .txt Button */}
+          <button
+            type="button"
+            onClick={handleSaveTxt}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-semibold text-xs bg-[#F2F0EB] hover:bg-[#E6E3DC] text-[#3B433F] border border-[#DFDBD2] transition-all cursor-pointer"
+            title="Save local plain-text clinical note (.txt)"
+          >
+            <Download className="w-3.5 h-3.5 text-[#4A6B5D]" />
+            <span>{savedTxt ? 'Saved!' : 'Save .txt'}</span>
+          </button>
+
+          {/* Standard Clipboard Emoji Button */}
           <button
             type="button"
             onClick={handleCopy}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all duration-200 cursor-pointer shadow-xs ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all duration-200 cursor-pointer shadow-xs ${
               copied
                 ? 'bg-[#386B52] text-white ring-2 ring-[#386B52]/20'
                 : 'bg-[#4A6B5D] hover:bg-[#3D5B4F] text-white active:scale-95'
             }`}
             title="Copy full conjoined response to clipboard"
           >
-            <span className="text-base" role="img" aria-label="clipboard">
+            <span className="text-sm" role="img" aria-label="clipboard">
               📋
             </span>
             <span>{copied ? 'Copied!' : 'Copy to Clipboard'}</span>
             {copied && <Check className="w-3.5 h-3.5 text-white" />}
           </button>
+
+          {/* Raised-Border Draggable Full Note Handle (RT-004) */}
+          <div
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData('text/plain', rawText);
+              e.dataTransfer.effectAllowed = 'copy';
+            }}
+            className="w-8 h-8 rounded-xl bg-[#EDF3F0] border-2 border-[#4A6B5D] text-[#345345] flex items-center justify-center font-bold text-sm cursor-grab active:cursor-grabbing select-none"
+          >
+            ⇄
+          </div>
         </div>
       </div>
 
-      {/* Selected Items Tag Chips by Question */}
+      {/* Selected Items Tag Chips by Section */}
       <div className="py-3 border-b border-[#EFECE6] space-y-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
         {QUESTION_CONFIGS.map((q) => {
           const items = note[q.id];
@@ -150,7 +205,7 @@ export const ConjoinedOutputBox: React.FC<Props> = ({
 
         {totalItemsCount === 0 && (
           <div className="text-center py-4 text-xs text-[#87908B]">
-            Click any answer from the search results on the left to populate this conjoined output box.
+            Select any clinical statement on the left to populate this conjoined note.
           </div>
         )}
       </div>
@@ -185,8 +240,10 @@ export const ConjoinedOutputBox: React.FC<Props> = ({
         <textarea
           value={rawText}
           onChange={(e) => onChangeRawText(e.target.value)}
-          placeholder="Selected answers will automatically conjoin here into a complete clinical note. You can also edit this text directly..."
-          className="w-full flex-1 min-h-[280px] bg-[#FAF9F6] border border-[#DDD9D0] rounded-xl p-4 text-xs md:text-sm text-[#242927] leading-relaxed font-sans focus:outline-none focus:border-[#4A6B5D] focus:ring-1 focus:ring-[#4A6B5D]/20 resize-none font-mono selection:bg-[#D4E3DB]"
+          placeholder="Selected statements automatically conjoin here into a complete clinical note. You may also edit this text directly..."
+          className={`w-full flex-1 min-h-[280px] bg-[#FAF9F6] border rounded-xl p-4 text-xs md:text-sm text-[#242927] leading-relaxed outline-none resize-none font-mono selection:bg-[#D4E3DB] transition-all duration-500 ${
+            reEntryPulseActive ? 'border-[#529478] bg-[#F4FAF7]' : 'border-[#DDD9D0]'
+          }`}
         />
 
         {/* Footer Metrics */}
