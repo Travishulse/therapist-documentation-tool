@@ -82,6 +82,9 @@ Window {
             companionWindow.savedBannerActive = true
             saveResetTimer.restart()
         })
+        if (typeof updateChecker !== "undefined") {
+            updateChecker.checkForUpdates()
+        }
     }
 
     Timer {
@@ -1786,6 +1789,29 @@ Window {
                             font.pixelSize: 11
                             color: "#94a3b8"
                             elide: Text.ElideRight
+                        }
+                    }
+
+                    Rectangle {
+                        visible: typeof updateChecker !== "undefined" && updateChecker.updateAvailable
+                        Layout.preferredHeight: 28
+                        Layout.preferredWidth: updateRow.implicitWidth + 16
+                        radius: 14
+                        color: "#059669"
+                        border.color: "#34d399"
+                        RowLayout {
+                            id: updateRow
+                            anchors.centerIn: parent
+                            spacing: 5
+                            Text { text: "⬆ Update Available (" + updateChecker.latestVersion + ")"; color: "#ffffff"; font.pixelSize: 10; font.bold: true }
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                cadenceTracker.recordUserActivity()
+                                updateChecker.openDownloadUrl()
+                            }
                         }
                     }
 

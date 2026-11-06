@@ -18,6 +18,8 @@ set(CORE_SOURCES
     src/core/ClinicalEngine.cpp
     src/core/SessionCadenceTracker.h
     src/core/SessionCadenceTracker.cpp
+    src/core/UpdateChecker.h
+    src/core/UpdateChecker.cpp
 )
 
 set(APP_RESOURCES "")

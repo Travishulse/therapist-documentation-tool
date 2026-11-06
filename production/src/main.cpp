@@ -1,5 +1,6 @@
 #include "core/ClinicalEngine.h"
 #include "core/SessionCadenceTracker.h"
+#include "core/UpdateChecker.h"
 #include <QGuiApplication>
 #include <QIcon>
 #include <QQmlApplicationEngine>
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
 
     ClinicalCore::ClinicalEngine clinicalEngine;
     ClinicalCore::SessionCadenceTracker cadenceTracker;
+    ClinicalCore::UpdateChecker updateChecker(app.applicationVersion());
 
     const QStringList args = app.arguments();
     const bool smokeTestMode = args.contains(QStringLiteral("--smoke-test"));
@@ -28,6 +30,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty(QStringLiteral("clinicalEngine"), &clinicalEngine);
     engine.rootContext()->setContextProperty(QStringLiteral("cadenceTracker"), &cadenceTracker);
+    engine.rootContext()->setContextProperty(QStringLiteral("updateChecker"), &updateChecker);
 
     QObject::connect(
         &engine,
